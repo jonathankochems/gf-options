@@ -13,10 +13,10 @@ name:                gf-options
 version:             0.1.0.0
 
 -- A short (one-line) description of the package.
---synopsis:            TODO: write synopsis
+synopsis:            Module to download option chain from Google Finance
 
 -- A longer description of the package.
---description:        TODO: write description
+description:        Module to download option chain from Google Finance
 
 -- URL for the project homepage or repository.
 homepage:            https://github.com/jonathankochems/gf-options
@@ -37,8 +37,7 @@ maintainer:          Jonathan Kochems <jonathan.kochems@gmail.com>
 -- A copyright notice.
 -- copyright:           
 
---category:            TODO: pick category
-
+category:            Finance
 build-type:          Simple
 
 -- Extra files to be distributed with the package, such as examples or a 
