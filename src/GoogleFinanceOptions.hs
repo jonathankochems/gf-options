@@ -1,3 +1,2 @@
 module GoogleFinanceOptions where
 
-import GoogleFinanceOptions.Internal
