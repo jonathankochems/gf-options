@@ -1,12 +1,106 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module GoogleFinanceOptionsSpec (main, spec) where
 
+{-Imports for testing-}
 import Test.Hspec
+import Test.QuickCheck
+
+{-Basic libraries-}
+import Data.Char(isPrint)
+import Data.Time.Calendar(fromGregorian)
+import qualified Control.Exception as Except
+import Data.Either
+
+{-Modules to test-}
+import GoogleFinanceOptions.Query
+import qualified GoogleFinanceOptions.Query as Query
+import GoogleFinanceOptions.Types
 
 main :: IO ()
 main = hspec spec
 
 spec :: Spec
 spec = 
-  describe "someFunction" $ 
-    it "should work fine" $ 
-      True `shouldBe` True
+  describe "GoogleFinanceOptions.Query" $ do
+    it "should successfully perform a Google Finance Option Query (provided HTTP requests are served)" $
+        do res <- Except.try $ request "AAPL" Nothing
+           either 
+              (\(e :: Except.IOException) -> True) 
+              isOk  
+              res `shouldBe` True
+    it "should extract the queried expiry date for a given Google Finance Option Query" $ do
+        let r = fromResult $ parseRawOptionQueryResult sampleQuery
+        expiryDateForQuery r `shouldBe` fromGregorian 2015 7 31
+    it "should extract the available expiry dates from a given Google Finance Option Query" $ do
+        let r = fromResult $ parseRawOptionQueryResult sampleQuery
+        availableExpirations r `shouldBe` [fromGregorian 2015 7 31, fromGregorian 2015 8 7]
+    it "should extract the all *put* options from a given Google Finance Option Query" $ do
+        let put1 = Put { putContractId = "1122822964373558", 
+                         putName = "", 
+                         putSymbol = "AAPL150731P00080000", 
+                         putExchange = "OPRA", 
+                         putPrice = Nothing, 
+                         putChange = Nothing, 
+                         putBid = Nothing, 
+                         putAsk = Just 2.0e-2, 
+                         putOpeninterest = 0, 
+                         putVolume = Nothing, 
+                         putStrike = 80.0, 
+                         putExpiry = fromGregorian 2015 7 31,
+                         putUnderlyingSpotprice = 124.5 }
+            put2 = Put { putContractId = "50583084231368", 
+                         putName = "", 
+                         putSymbol = "AAPL150731P00085000", 
+                         putExchange = "OPRA", 
+                         putPrice = Nothing, 
+                         putChange = Nothing, 
+                         putBid = Nothing, 
+                         putAsk = Just 2.0e-2, 
+                         putOpeninterest = 0, 
+                         putVolume = Nothing, 
+                         putStrike = 85.0, 
+                         putExpiry = fromGregorian 2015 7 31,
+                         putUnderlyingSpotprice = 124.5 }
+        let r = fromResult $ parseRawOptionQueryResult sampleQuery
+        puts r `shouldBe` [put1, put2]
+    it "should extract the all *call* options from a given Google Finance Option Query" $ do
+        let call1 = Call { callContractId = "829128893700243", 
+                           callName = "", 
+                           callSymbol = "AAPL150731C00080000", 
+                           callExchange = "OPRA", 
+                           callPrice = Nothing, 
+                           callChange = Nothing, 
+                           callBid = Just 42.85, 
+                           callAsk = Just 44.85, 
+                           callOpeninterest = 0, 
+                           callVolume = Nothing, 
+                           callStrike = 80.0, 
+                           callExpiry = fromGregorian 2015 7 31,
+                           callUnderlyingSpotprice = 124.5 }
+            call2 = Call { callContractId = "312277272890488", 
+                           callName = "", 
+                           callSymbol = "AAPL150731C00085000", 
+                           callExchange = "OPRA", 
+                           callPrice = Nothing, 
+                           callChange = Nothing, 
+                           callBid = Just 37.8, 
+                           callAsk = Just 40.1, 
+                           callOpeninterest = 0, 
+                           callVolume = Nothing, 
+                           callStrike = 85.0, 
+                           callExpiry = fromGregorian 2015 7 31,
+                           callUnderlyingSpotprice = 124.5 }
+        let r = fromResult $ parseRawOptionQueryResult sampleQuery
+        calls r `shouldBe` [call1, call2]
+
+    it "should extract the underlying asset id from a given Google Finance Option Query" $ do
+        let r = fromResult $ parseRawOptionQueryResult sampleQuery
+        underlying r `shouldBe` "22144"
+    it "should extract the underlying spotprice from a given Google Finance Option Query" $ do
+        let r = fromResult $ parseRawOptionQueryResult sampleQuery
+        Query.underlyingSpotprice r `shouldBe` 124.5
+
+sampleQuery = "{\"calls\":[{\"cid\":\"829128893700243\",\"name\":\"\",\"s\":\"AAPL150731C00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"42.85\",\"a\":\"44.85\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"cid\":\"1122822964373558\",\"name\":\"\",\"s\":\"AAPL150731P00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_id\":\"22144\",\"underlying_price\":124.5}"
+
+
+

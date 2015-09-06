@@ -1,3 +1,0 @@
-module GoogleFinanceOptions.Internal
-    (
-    ) where
