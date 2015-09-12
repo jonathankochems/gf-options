@@ -20,11 +20,12 @@ module GoogleFinanceOptions.Query(
   -- * Queries
   RawOptionQueryResult, request, getExpiryDates, 
   -- * Inspecting RawOptionQueryResult
-  expiryDateForQuery, availableExpirations, puts, calls, underlying, underlyingSpotprice, 
+  expiryDateForQuery, availableExpirations, puts, calls, underlying, queryUnderlyingSpotprice, 
   -- * Low-level functions
   rawRequest, parseRawOptionQueryResult, gfinanceUrl ) where
 
 import Control.Applicative ((<$>))
+import Control.Lens ((.~))
 
 import qualified Network.HTTP    as HTTP 
 import qualified Network.Browser as Browser
@@ -36,7 +37,7 @@ import Text.JSON.Parsec(runParser, spaces, many, string, digit, choice, try, Cha
 import Data.Maybe(fromMaybe, isNothing, fromJust)
 
 import Text.JSON.Permissive(decodePermissive)
-import GoogleFinanceOptions.Types (Call(..), Put(..), Result(..), fromResult) 
+import GoogleFinanceOptions.Types (Call, Put, uninitialisedCall, uninitialisedPut, Contract(..), Result(..), fromResult)
 --import GoogleFinanceOptions.Types (Contract) 
 import qualified GoogleFinanceOptions.Types as Types
 
@@ -102,13 +103,13 @@ availableExpirations raw_oc = map (fromJSDate . fromJSOBJECT) expirations_list
 
 -- | Returns all put options that expire on the queried date
 puts :: RawOptionQueryResult -> [Put]
-puts raw_oc = map (putFromJSONPut (underlyingSpotprice raw_oc) . fromJSOBJECT) put_list
+puts raw_oc = map (putFromJSONPut (queryUnderlyingSpotprice raw_oc) . fromJSOBJECT) put_list
     where Just (JSArray put_list) = get_field jsonobject "puts"
           jsonobject = unwrapRawOptionQueryResult raw_oc 
 
 -- | Returns all call options that expire on the queried date
 calls :: RawOptionQueryResult -> [Call]
-calls raw_oc = map (callFromJSONCall (underlyingSpotprice raw_oc) . fromJSOBJECT) call_list
+calls raw_oc = map (callFromJSONCall (queryUnderlyingSpotprice raw_oc) . fromJSOBJECT) call_list
     where Just (JSArray call_list) = get_field jsonobject "calls"
           jsonobject = unwrapRawOptionQueryResult raw_oc 
 
@@ -118,8 +119,8 @@ underlying raw_oc = fromMyString "underlying_id" $ get_field jsonobject "underly
      where jsonobject = unwrapRawOptionQueryResult raw_oc 
 
 -- | Returns the spotprice of the underlying 
-underlyingSpotprice :: RawOptionQueryResult -> Double
-underlyingSpotprice raw_oc = fromRational p  ::Double
+queryUnderlyingSpotprice :: RawOptionQueryResult -> Double
+queryUnderlyingSpotprice raw_oc = fromRational p  ::Double
     where Just (JSRational _ p) = get_field jsonobject "underlying_price"
           jsonobject = unwrapRawOptionQueryResult raw_oc 
 
@@ -128,38 +129,39 @@ underlyingSpotprice raw_oc = fromRational p  ::Double
   Helper functions
 --------------------------------------------------------------------}
 -- Converts a JSON object representing a put to an object of type Put
-putFromJSONPut spot jsonput = Put{
-    putContractId   = fromMyString "cid" $ get_field jsonput "cid",
-    putName         = fromMyString "name" $ get_field jsonput "name",
-    putSymbol       = fromMyString "s" $ get_field jsonput "s",
-    putExchange     = fromMyString "e" $ get_field jsonput "e",
-    putPrice        = fromMyDouble' $ get_field jsonput "p",
-    putChange       = fromMyDouble' $ get_field jsonput "c" ,
-    putBid          = fromMyDouble' $ get_field jsonput "b",
-    putAsk          = fromMyDouble' $ get_field jsonput "a",
-    putOpeninterest = fromMyInt "vol" $ get_field jsonput "oi",
-    putVolume       = fromMyInt' $ get_field jsonput "vol",
-    putStrike       = fromMyDouble "strike" $ get_field jsonput "strike",
-    putExpiry       = dateFromString $ fromMyString "expiry" $ get_field jsonput "expiry",
-    putUnderlyingSpotprice = spot
-}
+putFromJSONPut spot jsonput = 
+    contractId          .~ fromMyString "cid"  (get_field jsonput "cid") $
+    name                .~ fromMyString "name" (get_field jsonput "name") $
+    symbol              .~ fromMyString "s"    (get_field jsonput "s") $
+    exchange            .~ fromMyString "e"    (get_field jsonput "e") $
+    price               .~ fromMyDouble'       (get_field jsonput "p") $
+    change              .~ fromMyDouble'       (get_field jsonput "c" ) $
+    bid                 .~ fromMyDouble'       (get_field jsonput "b") $
+    ask                 .~ fromMyDouble'       (get_field jsonput "a") $
+    openinterest        .~ fromMyInt "vol"     (get_field jsonput "oi") $
+    volume              .~ fromMyInt'          (get_field jsonput "vol") $
+    strike              .~ fromMyDouble "strike" (get_field jsonput "strike") $
+    expiry              .~ dateFromString (fromMyString "expiry" $ get_field jsonput "expiry") $
+    underlyingSpotprice .~ spot $
+    uninitialisedPut
 
 -- Converts a JSON object representing a call to an object of type Call
-callFromJSONCall spot jsonput = Call{
-    callContractId = fromMyString "cid" $ get_field jsonput "cid",
-    callName = fromMyString "name" $ get_field jsonput "name",
-    callSymbol = fromMyString "s" $ get_field jsonput "s",
-    callExchange = fromMyString "e" $ get_field jsonput "e",
-    callPrice = fromMyDouble' $ get_field jsonput "p",
-    callChange = fromMyDouble' $ get_field jsonput "c" ,
-    callBid = fromMyDouble' $ get_field jsonput "b",
-    callAsk = fromMyDouble' $ get_field jsonput "a",
-    callOpeninterest = fromMyInt "vol" $ get_field jsonput "oi",
-    callVolume = fromMyInt' $ get_field jsonput "vol",
-    callStrike = fromMyDouble "strike" $ get_field jsonput "strike",
-    callExpiry = dateFromString $ fromMyString "expiry" $ get_field jsonput "expiry",
-    callUnderlyingSpotprice = spot
-}
+callFromJSONCall spot jsonput = 
+    contractId          .~ fromMyString "cid"  (get_field jsonput "cid") $
+    name                .~ fromMyString "name" (get_field jsonput "name") $
+    symbol              .~ fromMyString "s"    (get_field jsonput "s") $
+    exchange            .~ fromMyString "e"    (get_field jsonput "e") $
+    price               .~ fromMyDouble' (get_field jsonput "p") $
+    change              .~ fromMyDouble' (get_field jsonput "c" ) $
+    bid                 .~ fromMyDouble' (get_field jsonput "b") $
+    ask                 .~ fromMyDouble' (get_field jsonput "a") $
+    openinterest        .~ fromMyInt "vol" (get_field jsonput "oi") $
+    volume              .~ fromMyInt' (get_field jsonput "vol") $
+    strike              .~ fromMyDouble "strike" (get_field jsonput "strike") $
+    expiry              .~ dateFromString (fromMyString "expiry" $ get_field jsonput "expiry") $
+    underlyingSpotprice .~ spot $
+    uninitialisedCall
+
 
 -- converting a JSON object representing a date to type Day
 fromJSDate jsdate = fromGregorian (fromJSRational y) (fromJSRational m) (fromJSRational d)

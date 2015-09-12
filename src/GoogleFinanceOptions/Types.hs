@@ -9,45 +9,69 @@
 --
 -- The types provided by Google Finance Options
 -----------------------------------------------------------------------------
-module GoogleFinanceOptions.Types where
---(export Result(..), isOk, isError, fromResult )
-import Data.Time.Calendar(Day)
+{-# LANGUAGE TemplateHaskell #-}
+module GoogleFinanceOptions.Types ( 
+    Contract(..),
+    Put,
+    uninitialisedPut,
+    Call,
+    uninitialisedCall,
+    Result(..), isOk, isError, fromResult 
+    ) where
+
+import Data.Time.Calendar(Day, fromGregorian)
+import Control.Lens (makeLenses, Simple, Lens)
 
 {--------------------------------------------------------------------
   Option Contracts
 --------------------------------------------------------------------}
 class Contract t where 
-    contractId   :: t -> String
-    name         :: t -> String
-    symbol       :: t -> String
-    exchange     :: t -> String
-    price        :: t -> Maybe Double 
-    change       :: t -> Maybe Double
-    bid          :: t -> Maybe Double
-    ask          :: t -> Maybe Double
-    openinterest :: t -> Int
-    volume       :: t -> Maybe Int
-    strike       :: t -> Double
-    expiry       :: t -> Day
-    underlyingSpotprice :: t -> Double
+    contractId   :: Simple Lens t String
+    name         :: Simple Lens t String
+    symbol       :: Simple Lens t String
+    exchange     :: Simple Lens t String
+    price        :: Simple Lens t (Maybe Double)
+    change       :: Simple Lens t (Maybe Double)
+    bid          :: Simple Lens t (Maybe Double)
+    ask          :: Simple Lens t (Maybe Double)
+    openinterest :: Simple Lens t Int
+    volume       :: Simple Lens t (Maybe Int)
+    strike       :: Simple Lens t Double
+    expiry       :: Simple Lens t Day
+    underlyingSpotprice :: Simple Lens t Double
 
 data Put = Put{
-    putContractId :: String,
-    putName :: String,
-    putSymbol :: String,
-    putExchange :: String,
-    putPrice :: Maybe Double, 
-    putChange :: Maybe Double,
-    putBid :: Maybe Double,
-    putAsk :: Maybe Double,
-    putOpeninterest :: Int,
-    putVolume :: Maybe Int,
-    putStrike :: Double,
-    putExpiry :: Day,
-    putUnderlyingSpotprice :: Double
+    _putContractId :: String,
+    _putName :: String,
+    _putSymbol :: String,
+    _putExchange :: String,
+    _putPrice :: Maybe Double, 
+    _putChange :: Maybe Double,
+    _putBid :: Maybe Double,
+    _putAsk :: Maybe Double,
+    _putOpeninterest :: Int,
+    _putVolume :: Maybe Int,
+    _putStrike :: Double,
+    _putExpiry :: Day,
+    _putUnderlyingSpotprice :: Double
 } deriving (Show, Eq)
+makeLenses ''Put
 
-uninitialisedPut = error "not implemented" :: Put
+uninitialisedPut = Put {
+                    _putContractId = "",
+                    _putName                = "",
+                    _putSymbol              = "",
+                    _putExchange            = "",
+                    _putPrice               = Nothing, 
+                    _putChange              = Nothing,
+                    _putBid                 = Nothing,
+                    _putAsk                 = Nothing,
+                    _putOpeninterest        = -1,
+                    _putVolume              = Nothing,
+                    _putStrike              = -1.0,
+                    _putExpiry              = fromGregorian 0 0 0,
+                    _putUnderlyingSpotprice = -1.0
+                    }
 
 instance Contract Put where
     contractId   = putContractId
@@ -65,22 +89,37 @@ instance Contract Put where
     underlyingSpotprice = putUnderlyingSpotprice
 
 data Call = Call{
-    callContractId :: String,
-    callName :: String,
-    callSymbol :: String,
-    callExchange :: String,
-    callPrice :: Maybe Double, 
-    callChange :: Maybe Double,
-    callBid :: Maybe Double,
-    callAsk :: Maybe Double,
-    callOpeninterest :: Int,
-    callVolume :: Maybe Int,
-    callStrike :: Double,
-    callExpiry :: Day,
-    callUnderlyingSpotprice :: Double
+    _callContractId :: String,
+    _callName :: String,
+    _callSymbol :: String,
+    _callExchange :: String,
+    _callPrice :: Maybe Double, 
+    _callChange :: Maybe Double,
+    _callBid :: Maybe Double,
+    _callAsk :: Maybe Double,
+    _callOpeninterest :: Int,
+    _callVolume :: Maybe Int,
+    _callStrike :: Double,
+    _callExpiry :: Day,
+    _callUnderlyingSpotprice :: Double
 } deriving (Show, Eq)
+makeLenses ''Call
 
-uninitialisedCall = error "not implemented" :: Call
+uninitialisedCall = Call {
+                    _callContractId = "",
+                    _callName                = "",
+                    _callSymbol              = "",
+                    _callExchange            = "",
+                    _callPrice               = Nothing, 
+                    _callChange              = Nothing,
+                    _callBid                 = Nothing,
+                    _callAsk                 = Nothing,
+                    _callOpeninterest        = -1,
+                    _callVolume              = Nothing,
+                    _callStrike              = -1.0,
+                    _callExpiry              = fromGregorian 0 0 0,
+                    _callUnderlyingSpotprice = -1.0
+                    }
 
 instance Contract Call where
     contractId   = callContractId

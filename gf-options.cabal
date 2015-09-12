@@ -76,7 +76,8 @@ library
                        json >= 0.9,
                        time >= 1.4,
                        containers >= 0.5,
-                       HTTP >= 4000.2
+                       HTTP >= 4000.2,
+                       lens 
   
   -- Directories containing source files.
   hs-source-dirs:      src
@@ -96,5 +97,6 @@ Test-Suite test-gf-options
                     time >= 1.4,
                     containers >= 0.5,
                     HTTP >= 4000.2,
+                    lens, 
                     gf-options >= 0.1
   
