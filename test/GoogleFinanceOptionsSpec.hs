@@ -20,8 +20,30 @@ import GoogleFinanceOptions.Types
 main :: IO ()
 main = hspec spec
 
-spec :: Spec
-spec = 
+spec :: Spec 
+spec = do query
+          types
+
+types :: Spec
+types = 
+  describe "GoogleFinanceOptions.Types" $ 
+    it "should provide a Result type which tags errors with error messages" $
+        do let goodResult = Ok "goodResult"
+               badResult  = Error "something went wrong"
+           isOk goodResult  `shouldBe` True
+           isOk badResult   `shouldBe` False
+           isError goodResult `shouldBe` False
+           isError badResult  `shouldBe` True
+           fromResult goodResult `shouldBe` "goodResult"
+           res <- Except.try $ fromResult badResult
+           either 
+              (\(e :: Except.ErrorCall) -> True) 
+              (const False)  
+              res `shouldBe` True
+
+
+query :: Spec
+query = 
   describe "GoogleFinanceOptions.Query" $ do
     it "should successfully perform a Google Finance Option Query (provided HTTP requests are served)" $
         do res <- Except.try $ request "AAPL" Nothing
