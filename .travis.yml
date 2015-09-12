@@ -39,7 +39,7 @@ script:
     fi)
 
 after_script: 
-  - codecov-haskell test-gf-options --exclude-dir=tests --display-report --print-response --dont-send > .tmp-report
+  - codecov-haskell test-gf-options --exclude-dir=test --display-report --print-response --dont-send > .tmp-report
   - bash <(curl -s https://codecov.io/bash) -f .tmp-report
 
 notifications:
