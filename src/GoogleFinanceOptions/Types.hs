@@ -9,7 +9,6 @@
 --
 -- The types provided by Google Finance Options
 -----------------------------------------------------------------------------
-{-# LANGUAGE TemplateHaskell #-}
 module GoogleFinanceOptions.Types ( 
     Contract(..),
     Put,
@@ -19,8 +18,8 @@ module GoogleFinanceOptions.Types (
     Result(..), isOk, isError, fromResult 
     ) where
 
+import Control.Lens (makeLenses, Simple, Lens, lens)
 import Data.Time.Calendar(Day, fromGregorian)
-import Control.Lens (makeLenses, Simple, Lens)
 
 {--------------------------------------------------------------------
   Option Contracts
@@ -55,7 +54,45 @@ data Put = Put{
     _putExpiry :: Day,
     _putUnderlyingSpotprice :: Double
 } deriving (Show, Eq)
-makeLenses ''Put
+
+putContractId :: Simple Lens Put String
+putContractId = lens _putContractId (\p x -> p{ _putContractId = x})
+
+putName :: Simple Lens Put String
+putName = lens _putName (\p x -> p{ _putName = x})
+
+putSymbol :: Simple Lens Put String
+putSymbol = lens _putSymbol (\p x -> p{ _putSymbol = x})
+
+putExchange :: Simple Lens Put String
+putExchange = lens _putExchange (\p x -> p{ _putExchange = x})
+
+putPrice :: Simple Lens Put (Maybe Double)
+putPrice = lens _putPrice (\p x -> p{ _putPrice = x})
+
+putChange :: Simple Lens Put (Maybe Double)
+putChange = lens _putChange (\p x -> p{ _putChange = x})
+
+putBid :: Simple Lens Put (Maybe Double)
+putBid = lens _putBid (\p x -> p{ _putBid = x})
+
+putAsk :: Simple Lens Put (Maybe Double)
+putAsk = lens _putAsk (\p x -> p{ _putAsk = x})
+
+putOpeninterest :: Simple Lens Put Int
+putOpeninterest = lens _putOpeninterest (\p x -> p{ _putOpeninterest = x})
+
+putVolume :: Simple Lens Put (Maybe Int)
+putVolume = lens _putVolume (\p x -> p{ _putVolume = x})
+
+putStrike :: Simple Lens Put Double
+putStrike = lens _putStrike (\p x -> p{ _putStrike = x})
+
+putExpiry :: Simple Lens Put Day
+putExpiry = lens _putExpiry (\p x -> p{ _putExpiry = x})
+
+putUnderlyingSpotprice :: Simple Lens Put Double
+putUnderlyingSpotprice = lens _putUnderlyingSpotprice (\p x -> p{ _putUnderlyingSpotprice = x})
 
 uninitialisedPut = Put {
                     _putContractId = "",
@@ -103,7 +140,45 @@ data Call = Call{
     _callExpiry :: Day,
     _callUnderlyingSpotprice :: Double
 } deriving (Show, Eq)
-makeLenses ''Call
+
+callContractId :: Simple Lens Call String
+callContractId = lens _callContractId (\p x -> p{ _callContractId = x})
+
+callName :: Simple Lens Call String
+callName = lens _callName (\p x -> p{ _callName = x})
+
+callSymbol :: Simple Lens Call String
+callSymbol = lens _callSymbol (\p x -> p{ _callSymbol = x})
+
+callExchange :: Simple Lens Call String
+callExchange = lens _callExchange (\p x -> p{ _callExchange = x})
+
+callPrice :: Simple Lens Call (Maybe Double)
+callPrice = lens _callPrice (\p x -> p{ _callPrice = x})
+
+callChange :: Simple Lens Call (Maybe Double)
+callChange = lens _callChange (\p x -> p{ _callChange = x})
+
+callBid :: Simple Lens Call (Maybe Double)
+callBid = lens _callBid (\p x -> p{ _callBid = x})
+
+callAsk :: Simple Lens Call (Maybe Double)
+callAsk = lens _callAsk (\p x -> p{ _callAsk = x})
+
+callOpeninterest :: Simple Lens Call Int
+callOpeninterest = lens _callOpeninterest (\p x -> p{ _callOpeninterest = x})
+
+callVolume :: Simple Lens Call (Maybe Int)
+callVolume = lens _callVolume (\p x -> p{ _callVolume = x})
+
+callStrike :: Simple Lens Call Double
+callStrike = lens _callStrike (\p x -> p{ _callStrike = x})
+
+callExpiry :: Simple Lens Call Day
+callExpiry = lens _callExpiry (\p x -> p{ _callExpiry = x})
+
+callUnderlyingSpotprice :: Simple Lens Call Double
+callUnderlyingSpotprice = lens _callUnderlyingSpotprice (\p x -> p{ _callUnderlyingSpotprice = x})
 
 uninitialisedCall = Call {
                     _callContractId = "",
@@ -136,12 +211,13 @@ instance Contract Call where
     expiry       = callExpiry
     underlyingSpotprice = callUnderlyingSpotprice
 
+
 {--------------------------------------------------------------------
   Result Type
 --------------------------------------------------------------------}
 -- | Wrapper type for results
 data Result a = Ok a | Error String 
-  deriving Show
+    deriving Show
 
 -- | checks that result is a non-error
 isOk :: Result a -> Bool
