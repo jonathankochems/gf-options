@@ -34,6 +34,7 @@ types =
            isOk badResult   `shouldBe` False
            isError goodResult `shouldBe` False
            isError badResult  `shouldBe` True
+           show goodResult  `shouldBe` "Ok \"goodResult\""
            fromResult goodResult `shouldBe` "goodResult"
            res <- Except.try $ fromResult badResult
            either 
