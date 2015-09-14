@@ -98,19 +98,33 @@ types =
            put ^. expiry              `shouldBe` fromGregorian 2015 7 31 
            put ^. underlyingSpotprice `shouldBe` 124.5  
     it "should provide a default Put and Call Contract" $
-        do uninitialisedPut ^. contractId          `shouldBe` "" 
-           uninitialisedPut ^. name                `shouldBe` "" 
-           uninitialisedPut ^. symbol              `shouldBe` "" 
-           uninitialisedPut ^. exchange            `shouldBe` "" 
-           uninitialisedPut ^. price               `shouldBe` Nothing 
-           uninitialisedPut ^. change              `shouldBe` Nothing 
-           uninitialisedPut ^. bid                 `shouldBe` Nothing 
-           uninitialisedPut ^. ask                 `shouldBe` Nothing 
-           uninitialisedPut ^. openinterest        `shouldBe` -1 
-           uninitialisedPut ^. volume              `shouldBe` Nothing 
-           uninitialisedPut ^. strike              `shouldBe` -1.0 
-           uninitialisedPut ^. expiry              `shouldBe` fromGregorian 0 0 0 
-           uninitialisedPut ^. underlyingSpotprice `shouldBe` -1.0 
+        do uninitialisedPut ^. contractId           `shouldBe` "" 
+           uninitialisedPut ^. name                 `shouldBe` "" 
+           uninitialisedPut ^. symbol               `shouldBe` "" 
+           uninitialisedPut ^. exchange             `shouldBe` "" 
+           uninitialisedPut ^. price                `shouldBe` Nothing 
+           uninitialisedPut ^. change               `shouldBe` Nothing 
+           uninitialisedPut ^. bid                  `shouldBe` Nothing 
+           uninitialisedPut ^. ask                  `shouldBe` Nothing 
+           uninitialisedPut ^. openinterest         `shouldBe` -1 
+           uninitialisedPut ^. volume               `shouldBe` Nothing 
+           uninitialisedPut ^. strike               `shouldBe` -1.0 
+           uninitialisedPut ^. expiry               `shouldBe` fromGregorian 0 0 0 
+           uninitialisedPut ^. underlyingSpotprice  `shouldBe` -1.0 
+           uninitialisedCall ^. contractId          `shouldBe` "" 
+           uninitialisedCall ^. name                `shouldBe` "" 
+           uninitialisedCall ^. symbol              `shouldBe` "" 
+           uninitialisedCall ^. exchange            `shouldBe` "" 
+           uninitialisedCall ^. price               `shouldBe` Nothing 
+           uninitialisedCall ^. change              `shouldBe` Nothing 
+           uninitialisedCall ^. bid                 `shouldBe` Nothing 
+           uninitialisedCall ^. ask                 `shouldBe` Nothing 
+           uninitialisedCall ^. openinterest        `shouldBe` -1 
+           uninitialisedCall ^. volume              `shouldBe` Nothing 
+           uninitialisedCall ^. strike              `shouldBe` -1.0 
+           uninitialisedCall ^. expiry              `shouldBe` fromGregorian 0 0 0 
+           uninitialisedCall ^. underlyingSpotprice `shouldBe` -1.0 
+
 query :: Spec
 query = 
   describe "GoogleFinanceOptions.Query" $ do
