@@ -9,7 +9,7 @@ import Test.QuickCheck
 import Data.Char(isPrint)
 import Data.Time.Calendar(fromGregorian)
 import qualified Control.Exception as Except
-import Control.Lens ((.~))
+import Control.Lens ((.~),(^.))
 import Data.Either
 
 {-Modules to test-}
@@ -26,7 +26,7 @@ spec = do query
 
 types :: Spec
 types = 
-  describe "GoogleFinanceOptions.Types" $ 
+  describe "GoogleFinanceOptions.Types" $ do
     it "should provide a Result type which tags errors with error messages" $
         do let goodResult = Ok "goodResult"
                badResult  = Error "something went wrong"
@@ -41,7 +41,34 @@ types =
               (\(e :: Except.ErrorCall) -> True) 
               (const False)  
               res `shouldBe` True
-
+    it "should provide a lense interface to a Call through Contract" $
+        do let call = contractId          .~ "312277272890488" $
+                      name                .~ "" $
+                      symbol              .~ "AAPL150731C00085000" $
+                      exchange            .~ "OPRA" $
+                      price               .~ Nothing $
+                      change              .~ Nothing $
+                      bid                 .~ Just 37.8 $
+                      ask                 .~ Just 40.1 $
+                      openinterest        .~ 0 $
+                      volume              .~ Nothing $
+                      strike              .~ 85.0 $
+                      expiry              .~ fromGregorian 2015 7 31 $
+                      underlyingSpotprice .~ 124.5 $
+                      uninitialisedCall
+           call ^. contractId          `shouldBe` "312277272890488" 
+           call ^. name                `shouldBe` "" 
+           call ^. symbol              `shouldBe` "AAPL150731C00085000" 
+           call ^. exchange            `shouldBe` "OPRA" 
+           call ^. price               `shouldBe` Nothing 
+           call ^. change              `shouldBe` Nothing 
+           call ^. bid                 `shouldBe` Just 37.8 
+           call ^. ask                 `shouldBe` Just 40.1 
+           call ^. openinterest        `shouldBe` 0 
+           call ^. volume              `shouldBe` Nothing 
+           call ^. strike              `shouldBe` 85.0 
+           call ^. expiry              `shouldBe` fromGregorian 2015 7 31 
+           call ^. underlyingSpotprice `shouldBe` 124.5 
 
 query :: Spec
 query = 
