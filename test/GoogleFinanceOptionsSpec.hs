@@ -69,7 +69,35 @@ types =
            call ^. strike              `shouldBe` 85.0 
            call ^. expiry              `shouldBe` fromGregorian 2015 7 31 
            call ^. underlyingSpotprice `shouldBe` 124.5 
-
+    it "should provide a lense interface to a Put through Contract" $
+        do let put = contractId   .~ "1122822964373558" $
+                      name         .~ "" $
+                      symbol       .~ "AAPL150731P00080000" $
+                      exchange     .~ "OPRA" $
+                      price        .~ Nothing $
+                      change       .~ Nothing $
+                      bid          .~ Nothing $
+                      ask          .~ Just 2.0e-2 $
+                      openinterest .~ 0 $
+                      volume       .~ Nothing $
+                      strike       .~ 80.0 $
+                      expiry       .~ fromGregorian 2015 7 31 $
+                      underlyingSpotprice .~ 124.5  $
+                      uninitialisedPut
+           put ^. contractId          `shouldBe` "1122822964373558" 
+           put ^. name                `shouldBe` "" 
+           put ^. symbol              `shouldBe` "AAPL150731P00080000" 
+           put ^. exchange            `shouldBe` "OPRA" 
+           put ^. price               `shouldBe` Nothing 
+           put ^. change              `shouldBe` Nothing 
+           put ^. bid                 `shouldBe` Nothing 
+           put ^. ask                 `shouldBe` Just 2.0e-2 
+           put ^. openinterest        `shouldBe` 0 
+           put ^. volume              `shouldBe` Nothing 
+           put ^. strike              `shouldBe` 80.0 
+           put ^. expiry              `shouldBe` fromGregorian 2015 7 31 
+           put ^. underlyingSpotprice `shouldBe` 124.5  
+           
 query :: Spec
 query = 
   describe "GoogleFinanceOptions.Query" $ do
