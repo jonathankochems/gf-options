@@ -156,6 +156,9 @@ query =
 rawquery :: Spec
 rawquery = 
   describe "GoogleFinanceOptions.Query" $ do
+    it "should provide an error message when parsing a Google Finance Option Query fails" $ do
+        let r = parseRawOptionQueryResult "foo"
+        isError r `shouldBe` True
     it "should extract the queried expiry date for a given Google Finance Option Query" $ do
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
         expiryDateForQuery r `shouldBe` fromGregorian 2015 7 31
