@@ -21,8 +21,9 @@ main :: IO ()
 main = hspec spec
 
 spec :: Spec 
-spec = do query
-          types
+spec = do types
+          rawquery
+          query
 
 types :: Spec
 types = 
@@ -134,6 +135,17 @@ query =
               (\(e :: Except.IOException) -> True) 
               isOk  
               res `shouldBe` True
+    it "should successfully obtain all available expiration dates which are consistent with a Google Finance Option Query" $
+        do wholequery <- Except.try $ request "AAPL" Nothing
+           expiries   <- Except.try $ getExpiryDates "AAPL"
+           either 
+              (\(e :: Except.IOException) -> Nothing) 
+              (Just . availableExpirations . fromResult)  
+              wholequery `shouldBe` either (\(e :: Except.IOException) -> Nothing) Just expiries
+
+rawquery :: Spec
+rawquery = 
+  describe "GoogleFinanceOptions.Query" $ do
     it "should extract the queried expiry date for a given Google Finance Option Query" $ do
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
         expiryDateForQuery r `shouldBe` fromGregorian 2015 7 31
