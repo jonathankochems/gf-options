@@ -2,7 +2,7 @@
 -- |
 -- Module      :  GoogleFinanceOptions.Query
 -- Copyright   :  (c) Jonathan Kochems 2015
--- License     :  TBD
+-- License     :  BSD3
 -- Maintainer  :  jonathan.kochems@gmail.com
 -- Stability   :  experimental
 -- Portability :  nonportable
