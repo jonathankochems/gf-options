@@ -15,7 +15,7 @@ module GoogleFinanceOptions.Types (
     uninitialisedPut,
     Call,
     uninitialisedCall,
-    Result(..), isOk, isError, fromResult 
+    Result(..), isOk, isError, fromResult, fromError
     ) where
 
 import Control.Lens (makeLenses, Simple, Lens, lens)
@@ -233,3 +233,8 @@ isError _          = False
 fromResult :: Result a -> a
 fromResult (Ok x)    = x
 fromResult (Error s) = error s
+
+-- | extracts error message 
+fromError :: Result a -> String
+fromError (Error s) = s
+fromError (Ok _)    = error "Error expected string found."
