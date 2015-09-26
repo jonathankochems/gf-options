@@ -142,6 +142,16 @@ query =
               (\(e :: Except.IOException) -> Nothing) 
               (Just . availableExpirations . fromResult)  
               wholequery `shouldBe` either (\(e :: Except.IOException) -> Nothing) Just expiries
+    it "should successfully perform a Google Finance Option Query for a specific date (provided HTTP requests are served)" $
+        do expiries <- Except.try $ getExpiryDates "AAPL"
+           let exps = either (\(e :: Except.IOException) -> []) id expiries
+           length exps >= 2 `shouldBe` True                      
+           res <- Except.try . request "AAPL" . Just $ exps !! 1
+           either 
+              (\(e :: Except.IOException) -> True) 
+              isOk  
+              res `shouldBe` True
+
 
 rawquery :: Spec
 rawquery = 
