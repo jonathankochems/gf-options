@@ -157,8 +157,8 @@ rawquery :: Spec
 rawquery = 
   describe "GoogleFinanceOptions.Query" $ do
     it "should provide an error message when parsing a Google Finance Option Query fails" $ do
-        let r = parseRawOptionQueryResult "foo"
-        isError r `shouldBe` True
+        let errormsg = fromError $ parseRawOptionQueryResult "foo"
+        errormsg `shouldBe` "parsing of raw option chain data failed: \"\\\"stdin\\\" (line 1, column 1):\\nunexpected \\\"f\\\"\\nexpecting white space or \\\"{\\\"\""
     it "should extract the queried expiry date for a given Google Finance Option Query" $ do
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
         expiryDateForQuery r `shouldBe` fromGregorian 2015 7 31
