@@ -217,6 +217,7 @@ rawquery =
         (badPut ^. exchange)     `shouldErrorWith` "error processing JSValue String e"
         (badPut ^. openinterest) `shouldErrorWith` "error processing JSValue Int oi"
         (badPut ^. strike)       `shouldErrorWith` "error processing JSValue Double strike"
+        (badPut ^. volume)       `shouldBe`        Just 42
 
     it "should extract the all *call* options from a given Google Finance Option Query" $ do
         let call1 = contractId   .~ "829128893700243" $ 
@@ -256,6 +257,8 @@ rawquery =
         (badCall ^. exchange)     `shouldErrorWith` "error processing JSValue String e"
         (badCall ^. openinterest) `shouldErrorWith` "error processing JSValue Int oi"
         (badCall ^. strike)       `shouldErrorWith` "error processing JSValue Double strike"
+        (badCall ^. volume)       `shouldBe`        Just 42
+        (badCall ^. bid)          `shouldBe`        Just 42.00
 
     it "should extract the underlying asset id from a given Google Finance Option Query" $ do
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
@@ -267,6 +270,6 @@ rawquery =
         queryUnderlyingSpotprice r `shouldBe` 124.5
 
 sampleQuery = "{\"calls\":[{\"cid\":\"829128893700243\",\"name\":\"\",\"s\":\"AAPL150731C00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"42.85\",\"a\":\"44.85\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"cid\":\"1122822964373558\",\"name\":\"\",\"s\":\"AAPL150731P00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_id\":\"22144\",\"underlying_price\":124.5}"
-badSampleQuery = "{\"calls\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"42.85\",\"a\":\"44.85\",\"vol\":\"-\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"vol\":\"-\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_price\":124.5}"
+badSampleQuery = "{\"calls\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"+42.00\",\"a\":\"44.85\",\"vol\":\"42\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"vol\":\"42\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_price\":124.5}"
 
 
