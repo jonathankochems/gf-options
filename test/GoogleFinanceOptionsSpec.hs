@@ -42,6 +42,11 @@ types =
               (\(e :: Except.ErrorCall) -> True) 
               (const False)  
               res `shouldBe` True
+           res' <- Except.try . print $ fromError goodResult
+           either 
+              (\(e :: Except.ErrorCall) -> True) 
+              (const False)  
+              res' `shouldBe` True
     it "should provide a lense interface to a Call through Contract" $
         do let call = contractId          .~ "312277272890488" $
                       name                .~ "" $
