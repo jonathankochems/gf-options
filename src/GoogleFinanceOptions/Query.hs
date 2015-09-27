@@ -207,7 +207,8 @@ fromJSSTRING (JSString x) = x
 fromJSOBJECT (JSObject x) = x
 
 -- converting a string representing a date in "MMM DD, YYYY" format to a date of type Day
-dateFromString stringdate = either (\_ -> error "dateFromString") (\(y,m,d) -> fromGregorian y m d) $ runParser date_p () "stdin" stringdate
+dateFromString :: String -> Day 
+dateFromString stringdate = either (\e -> error $ "error processing JSValue Day: " ++ show e) (\(y,m,d) -> fromGregorian y m d) $ runParser date_p () "stdin" stringdate
     where date_p = do m <- month_p
                       _ <- spaces
                       d <- day_p
