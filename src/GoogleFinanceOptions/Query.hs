@@ -130,35 +130,35 @@ queryUnderlyingSpotprice raw_oc = fromRational p  ::Double
 --------------------------------------------------------------------}
 -- Converts a JSON object representing a put to an object of type Put
 putFromJSONPut spot jsonput = 
-    contractId          .~ fromMyString "cid"  (get_field jsonput "cid") $
-    name                .~ fromMyString "name" (get_field jsonput "name") $
-    symbol              .~ fromMyString "s"    (get_field jsonput "s") $
-    exchange            .~ fromMyString "e"    (get_field jsonput "e") $
-    price               .~ fromMyDouble'       (get_field jsonput "p") $
-    change              .~ fromMyDouble'       (get_field jsonput "c" ) $
-    bid                 .~ fromMyDouble'       (get_field jsonput "b") $
-    ask                 .~ fromMyDouble'       (get_field jsonput "a") $
-    openinterest        .~ fromMyInt "vol"     (get_field jsonput "oi") $
-    volume              .~ fromMyInt'          (get_field jsonput "vol") $
+    contractId          .~ fromMyString "cid"    (get_field jsonput "cid") $
+    name                .~ fromMyString "name"   (get_field jsonput "name") $
+    symbol              .~ fromMyString "s"      (get_field jsonput "s") $
+    exchange            .~ fromMyString "e"      (get_field jsonput "e") $
+    price               .~ fromMyDouble'         (get_field jsonput "p") $
+    change              .~ fromMyDouble'         (get_field jsonput "c" ) $
+    bid                 .~ fromMyDouble'         (get_field jsonput "b") $
+    ask                 .~ fromMyDouble'         (get_field jsonput "a") $
+    openinterest        .~ fromMyInt "oi"        (get_field jsonput "oi") $
+    volume              .~ fromMyInt'            (get_field jsonput "vol") $
     strike              .~ fromMyDouble "strike" (get_field jsonput "strike") $
-    expiry              .~ dateFromString (fromMyString "expiry" $ get_field jsonput "expiry") $
+    expiry              .~ dateFromString        (fromMyString "expiry" $ get_field jsonput "expiry") $
     underlyingSpotprice .~ spot $
     uninitialisedPut
 
 -- Converts a JSON object representing a call to an object of type Call
 callFromJSONCall spot jsonput = 
-    contractId          .~ fromMyString "cid"  (get_field jsonput "cid") $
-    name                .~ fromMyString "name" (get_field jsonput "name") $
-    symbol              .~ fromMyString "s"    (get_field jsonput "s") $
-    exchange            .~ fromMyString "e"    (get_field jsonput "e") $
-    price               .~ fromMyDouble' (get_field jsonput "p") $
-    change              .~ fromMyDouble' (get_field jsonput "c" ) $
-    bid                 .~ fromMyDouble' (get_field jsonput "b") $
-    ask                 .~ fromMyDouble' (get_field jsonput "a") $
-    openinterest        .~ fromMyInt "vol" (get_field jsonput "oi") $
-    volume              .~ fromMyInt' (get_field jsonput "vol") $
+    contractId          .~ fromMyString "cid"    (get_field jsonput "cid") $
+    name                .~ fromMyString "name"   (get_field jsonput "name") $
+    symbol              .~ fromMyString "s"      (get_field jsonput "s") $
+    exchange            .~ fromMyString "e"      (get_field jsonput "e") $
+    price               .~ fromMyDouble'         (get_field jsonput "p") $
+    change              .~ fromMyDouble'         (get_field jsonput "c" ) $
+    bid                 .~ fromMyDouble'         (get_field jsonput "b") $
+    ask                 .~ fromMyDouble'         (get_field jsonput "a") $
+    openinterest        .~ fromMyInt "oi"        (get_field jsonput "oi") $
+    volume              .~ fromMyInt'            (get_field jsonput "vol") $
     strike              .~ fromMyDouble "strike" (get_field jsonput "strike") $
-    expiry              .~ dateFromString (fromMyString "expiry" $ get_field jsonput "expiry") $
+    expiry              .~ dateFromString        (fromMyString "expiry" $ get_field jsonput "expiry") $
     underlyingSpotprice .~ spot $
     uninitialisedCall
 
@@ -170,15 +170,15 @@ fromJSDate jsdate = fromGregorian (fromJSRational y) (fromJSRational m) (fromJSR
           Just d = get_field jsdate "d"
 
 -- Converts a Maybe JSValue representing a potential string to a String
-fromMyString err = fromJSString . fromJSSTRING . fromMaybe (error $ "error processing JSValue " ++ err)
+fromMyString err = fromJSString . fromJSSTRING . fromMaybe (error $ "error processing JSValue String " ++ err)
 
 -- Converts a Maybe JSValue representing a potential double to a Double
 fromMyDouble :: String -> Maybe JSValue -> Double 
-fromMyDouble err = read . fromJSString . fromJSSTRING . fromMaybe (error err)
+fromMyDouble err = read . fromJSString . fromJSSTRING . fromMaybe (error $ "error processing JSValue Double " ++ err)
 
 -- Converts a Maybe JSValue representing a potential int to an Int
 fromMyInt :: String -> Maybe JSValue -> Int
-fromMyInt err = read . fromJSString . fromJSSTRING . fromMaybe (error err)
+fromMyInt err = read . fromJSString . fromJSSTRING . fromMaybe (error $ "error processing JSValue Int " ++ err)
 
 -- Converts a Maybe JSValue representing a potential double to a Maybe Double
 fromMyDouble' :: Maybe JSValue -> Maybe Double 
