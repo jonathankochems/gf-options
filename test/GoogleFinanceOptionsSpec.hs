@@ -17,6 +17,15 @@ import GoogleFinanceOptions.Query
 import qualified GoogleFinanceOptions.Query as Query
 import GoogleFinanceOptions.Types
 
+
+
+shouldErrorWith comp error =
+    do result <- Except.try $ comp `seq` print ()
+       either 
+         (\(e :: Except.ErrorCall) -> Just $ show e) 
+         (const Nothing)  
+         result `shouldBe` Just error
+
 main :: IO ()
 main = hspec spec
 
@@ -199,8 +208,14 @@ rawquery =
                    expiry       .~ fromGregorian 2015 7 31 $
                    underlyingSpotprice .~ 124.5 $
                    uninitialisedPut
-        let r = fromResult $ parseRawOptionQueryResult sampleQuery
+        let r     = fromResult $ parseRawOptionQueryResult sampleQuery
         puts r `shouldBe` [put1, put2]
+        let badPut = head . puts . fromResult $ parseRawOptionQueryResult badSampleQuery
+        (badPut ^. contractId) `shouldErrorWith` "error processing JSValue cid" 
+        (badPut ^. name)       `shouldErrorWith` "error processing JSValue name"
+        (badPut ^. symbol)     `shouldErrorWith` "error processing JSValue s"
+        (badPut ^. exchange)   `shouldErrorWith` "error processing JSValue e"
+
     it "should extract the all *call* options from a given Google Finance Option Query" $ do
         let call1 = contractId   .~ "829128893700243" $ 
                     name         .~ "" $ 
@@ -232,21 +247,22 @@ rawquery =
                     uninitialisedCall
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
         calls r `shouldBe` [call1, call2]
+        let badCall = head . calls . fromResult $ parseRawOptionQueryResult badSampleQuery
+        (badCall ^. contractId) `shouldErrorWith` "error processing JSValue cid" 
+        (badCall ^. name)       `shouldErrorWith` "error processing JSValue name"
+        (badCall ^. symbol)     `shouldErrorWith` "error processing JSValue s"
+        (badCall ^. exchange)   `shouldErrorWith` "error processing JSValue e"
 
     it "should extract the underlying asset id from a given Google Finance Option Query" $ do
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
             badr = fromResult $ parseRawOptionQueryResult badSampleQuery
         underlying r `shouldBe` "22144"
-        res <- Except.try . print $ underlying badr
-        either 
-           (\(e :: Except.ErrorCall) -> show e) 
-           (const "")  
-           res `shouldBe` "error processing JSValue underlying_id"
+        underlying badr `shouldErrorWith` "error processing JSValue underlying_id"
     it "should extract the underlying spotprice from a given Google Finance Option Query" $ do
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
         queryUnderlyingSpotprice r `shouldBe` 124.5
 
 sampleQuery = "{\"calls\":[{\"cid\":\"829128893700243\",\"name\":\"\",\"s\":\"AAPL150731C00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"42.85\",\"a\":\"44.85\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"cid\":\"1122822964373558\",\"name\":\"\",\"s\":\"AAPL150731P00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_id\":\"22144\",\"underlying_price\":124.5}"
-badSampleQuery = "{\"calls\":[{\"cid\":\"829128893700243\",\"name\":\"\",\"s\":\"AAPL150731C00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"42.85\",\"a\":\"44.85\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"cid\":\"1122822964373558\",\"name\":\"\",\"s\":\"AAPL150731P00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_price\":124.5}"
+badSampleQuery = "{\"calls\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"42.85\",\"a\":\"44.85\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_price\":124.5}"
 
 
