@@ -210,13 +210,15 @@ rawquery =
                    uninitialisedPut
         let r     = fromResult $ parseRawOptionQueryResult sampleQuery
         puts r `shouldBe` [put1, put2]
-        let badPut = head . puts . fromResult $ parseRawOptionQueryResult badSampleQuery
+        let badPut  = head .        puts . fromResult $ parseRawOptionQueryResult badSampleQuery
+            badPut' = head . tail . puts . fromResult $ parseRawOptionQueryResult badSampleQuery
         (badPut ^. contractId)   `shouldErrorWith` "error processing JSValue String cid" 
         (badPut ^. name)         `shouldErrorWith` "error processing JSValue String name"
         (badPut ^. symbol)       `shouldErrorWith` "error processing JSValue String s"
         (badPut ^. exchange)     `shouldErrorWith` "error processing JSValue String e"
         (badPut ^. openinterest) `shouldErrorWith` "error processing JSValue Int oi"
         (badPut ^. strike)       `shouldErrorWith` "error processing JSValue Double strike"
+        (badPut' ^. expiry)      `shouldErrorWith` "error processing JSValue String expiry"
         (badPut ^. expiry)       `shouldErrorWith` "error processing JSValue Day: \"stdin\" (line 1, column 1):\nunexpected \"b\"\nexpecting \"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\", \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\" or \"Dec\""
         (badPut ^. volume)       `shouldBe`        Just 42
 
@@ -251,13 +253,15 @@ rawquery =
                     uninitialisedCall
         let r = fromResult $ parseRawOptionQueryResult sampleQuery
         calls r `shouldBe` [call1, call2]
-        let badCall = head . calls . fromResult $ parseRawOptionQueryResult badSampleQuery
+        let badCall  = head .        calls . fromResult $ parseRawOptionQueryResult badSampleQuery
+            badCall' = head . tail . calls . fromResult $ parseRawOptionQueryResult badSampleQuery
         (badCall ^. contractId)   `shouldErrorWith` "error processing JSValue String cid" 
         (badCall ^. name)         `shouldErrorWith` "error processing JSValue String name"
         (badCall ^. symbol)       `shouldErrorWith` "error processing JSValue String s"
         (badCall ^. exchange)     `shouldErrorWith` "error processing JSValue String e"
         (badCall ^. openinterest) `shouldErrorWith` "error processing JSValue Int oi"
         (badCall ^. strike)       `shouldErrorWith` "error processing JSValue Double strike"
+        (badCall' ^. expiry)      `shouldErrorWith` "error processing JSValue String expiry"
         (badCall ^. expiry)       `shouldErrorWith` "error processing JSValue Day: \"stdin\" (line 1, column 1):\nunexpected \"f\"\nexpecting \"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\", \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\" or \"Dec\""
         (badCall ^. volume)       `shouldBe`        Just 42
         (badCall ^. bid)          `shouldBe`        Just 42.00
@@ -272,6 +276,6 @@ rawquery =
         queryUnderlyingSpotprice r `shouldBe` 124.5
 
 sampleQuery = "{\"calls\":[{\"cid\":\"829128893700243\",\"name\":\"\",\"s\":\"AAPL150731C00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"42.85\",\"a\":\"44.85\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"cid\":\"1122822964373558\",\"name\":\"\",\"s\":\"AAPL150731P00080000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"80.00\",\"expiry\":\"Jul 31, 2015\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_id\":\"22144\",\"underlying_price\":124.5}"
-badSampleQuery = "{\"calls\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"+42.00\",\"a\":\"44.85\",\"vol\":\"42\",\"expiry\":\"foo\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"puts\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"vol\":\"42\",\"expiry\":\"bar\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\",\"expiry\":\"Jul 31, 2015\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_price\":124.5}"
+badSampleQuery = "{\"calls\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"+42.00\",\"a\":\"44.85\",\"vol\":\"42\",\"expiry\":\"foo\"},{\"cid\":\"312277272890488\",\"name\":\"\",\"s\":\"AAPL150731C00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"37.80\",\"a\":\"40.10\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\"}],\"puts\":[{\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"vol\":\"42\",\"expiry\":\"bar\"},{\"cid\":\"50583084231368\",\"name\":\"\",\"s\":\"AAPL150731P00085000\",\"e\":\"OPRA\",\"p\":\"-\",\"c\":\"-\",\"b\":\"-\",\"a\":\"0.02\",\"oi\":\"0\",\"vol\":\"-\",\"strike\":\"85.00\"}],\"expirations\":[{\"y\":2015,\"m\":7,\"d\":31},{\"y\":2015,\"m\":8,\"d\":7}],\"expiry\":{\"y\":2015,\"m\":7,\"d\":31},\"underlying_price\":124.5}"
 
 
