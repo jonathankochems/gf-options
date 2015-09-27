@@ -170,7 +170,7 @@ fromJSDate jsdate = fromGregorian (fromJSRational y) (fromJSRational m) (fromJSR
           Just d = get_field jsdate "d"
 
 -- Converts a Maybe JSValue representing a potential string to a String
-fromMyString err = fromJSString . fromJSSTRING . fromMaybe (error err)
+fromMyString err = fromJSString . fromJSSTRING . fromMaybe (error $ "error processing JSValue " ++ err)
 
 -- Converts a Maybe JSValue representing a potential double to a Double
 fromMyDouble :: String -> Maybe JSValue -> Double 
